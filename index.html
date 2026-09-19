@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#ff6ec7" />
+<title>Slime Time 🟢 Sales</title>
+<style>
+  :root{
+    --pink:#ff4fb0;
+    --orange:#ff8a3d;
+    --yellow:#ffd23f;
+    --ink:#3a2140;
+    --card:#ffffff;
+    --good:#22b573;
+    --shadow:0 6px 18px rgba(120,40,90,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,var(--pink) 0%,var(--orange) 55%,var(--yellow) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding-bottom:170px;
+  }
+  header{
+    text-align:center;
+    padding:16px 12px 8px;
+    color:#fff;
+    text-shadow:0 2px 6px rgba(150,30,90,.35);
+  }
+  header h1{
+    margin:0;
+    font-size:34px;
+    font-weight:900;
+    letter-spacing:1px;
+    font-style:italic;
+    transform:skewX(-6deg);
+  }
+  header p{margin:2px 0 0;font-size:13px;opacity:.95;font-weight:600;}
+
+  /* Tabs */
+  .tabs{
+    display:flex;gap:8px;justify-content:center;
+    padding:8px 10px 4px;position:sticky;top:0;z-index:20;
+  }
+  .tab{
+    flex:1;max-width:150px;border:none;cursor:pointer;
+    padding:12px 8px;border-radius:14px;font-size:15px;font-weight:800;
+    background:rgba(255,255,255,.35);color:#fff;backdrop-filter:blur(4px);
+    box-shadow:var(--shadow);transition:transform .08s;
+  }
+  .tab.active{background:#fff;color:var(--pink);}
+  .tab:active{transform:scale(.96);}
+
+  main{padding:6px 12px 12px;max-width:640px;margin:0 auto;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* Item grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+  .item{
+    background:var(--card);border:none;border-radius:18px;padding:16px 12px;
+    box-shadow:var(--shadow);cursor:pointer;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    transition:transform .08s;min-height:120px;justify-content:center;
+  }
+  .item:active{transform:scale(.95);}
+  .item .emoji{font-size:34px;line-height:1;}
+  .item .name{font-weight:800;font-size:15px;}
+  .item .price{font-weight:900;color:var(--pink);font-size:18px;}
+  .item .sub{font-size:11px;color:#8a7690;font-weight:600;}
+  .item.wide{grid-column:1 / -1;}
+
+  /* Mix-in price chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px;}
+  .chip{
+    border:none;background:var(--yellow);color:var(--ink);font-weight:800;
+    padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;box-shadow:var(--shadow);
+  }
+  .chip:active{transform:scale(.94);}
+
+  /* Cart bar */
+  .cartbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:#fff;box-shadow:0 -6px 20px rgba(120,40,90,.22);
+    border-radius:20px 20px 0 0;padding:10px 14px 14px;
+  }
+  .cartlist{max-height:170px;overflow-y:auto;margin-bottom:6px;}
+  .line{
+    display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed #eedcf0;
+  }
+  .line .desc{flex:1;font-size:14px;font-weight:600;}
+  .line .lp{font-weight:800;min-width:58px;text-align:right;}
+  .qtybtn{
+    width:30px;height:30px;border-radius:50%;border:none;font-size:18px;font-weight:900;
+    background:var(--pink);color:#fff;cursor:pointer;line-height:1;
+  }
+  .qtybtn.minus{background:#d9c3e0;color:var(--ink);}
+  .qtynum{min-width:20px;text-align:center;font-weight:800;}
+  .empty{color:#b39dbb;text-align:center;font-size:14px;padding:10px;}
+  .totalrow{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;}
+  .totalrow .t1{font-size:16px;font-weight:700;}
+  .totalrow .t2{font-size:26px;font-weight:900;color:var(--pink);}
+  .actions{display:flex;gap:8px;}
+  .btn{
+    flex:1;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:800;
+    cursor:pointer;box-shadow:var(--shadow);
+  }
+  .btn:active{transform:scale(.97);}
+  .btn.venmo{background:#3d95ce;color:#fff;}
+  .btn.cash{background:var(--good);color:#fff;}
+  .btn.clear{background:#f0e3f4;color:#8a7690;flex:0 0 54px;}
+
+  /* Calculator */
+  .calc-card,.log-card{
+    background:#fff;border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-top:10px;
+  }
+  .calc-card label{font-weight:700;font-size:14px;display:block;margin:10px 0 4px;}
+  .calc-card input{
+    width:100%;padding:14px;font-size:18px;border:2px solid #f0d9ef;border-radius:12px;font-weight:700;
+  }
+  .calc-card input:focus{outline:none;border-color:var(--pink);}
+  .hint{font-size:12px;color:#8a7690;margin-top:8px;}
+
+  /* Log / sales */
+  .stat{display:flex;gap:10px;margin-bottom:10px;}
+  .stat .box{flex:1;background:#fff;border-radius:16px;padding:12px;text-align:center;box-shadow:var(--shadow);}
+  .stat .box .n{font-size:24px;font-weight:900;color:var(--pink);}
+  .stat .box .l{font-size:12px;color:#8a7690;font-weight:700;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid #f0e3f4;}
+  th{color:#8a7690;font-size:11px;text-transform:uppercase;}
+  .method{font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;}
+  .method.Venmo{background:#e3f0fb;color:#3d95ce;}
+  .method.Cash{background:#e3f7ee;color:var(--good);}
+  .row-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .row-actions .btn{flex:1;min-width:130px;font-size:14px;padding:12px;}
+  .btn.export{background:var(--orange);color:#fff;}
+  .btn.wipe{background:#f0e3f4;color:#b3546b;}
+  .undo{color:#c85b8a;font-weight:800;background:none;border:none;cursor:pointer;font-size:12px;}
+
+  /* Toast */
+  .toast{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:200px;z-index:60;
+    background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-weight:700;
+    box-shadow:var(--shadow);opacity:0;transition:opacity .25s, bottom .25s;pointer-events:none;font-size:14px;
+  }
+  .toast.show{opacity:1;bottom:220px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🟢 SLIME TIME</h1>
+  <p>Farmer's Market Sales · pay to @Susan-Naughton</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-view="store">🛒 Store</button>
+  <button class="tab" data-view="calc">🧮 Custom</button>
+  <button class="tab" data-view="log">📒 Sales</button>
+</div>
+
+<main>
+  <!-- STORE -->
+  <section class="view active" id="store">
+    <div class="grid" id="itemGrid"></div>
+    <div class="item wide" style="cursor:default;margin-top:12px;">
+      <div class="name">✨ Add a Mix-in</div>
+      <div class="sub">pick a price ($0.25 – $1.00 each)</div>
+      <div class="chips">
+        <button class="chip" onclick="addMixin(0.25)">$0.25</button>
+        <button class="chip" onclick="addMixin(0.50)">$0.50</button>
+        <button class="chip" onclick="addMixin(0.75)">$0.75</button>
+        <button class="chip" onclick="addMixin(1.00)">$1.00</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOM CALCULATOR -->
+  <section class="view" id="calc">
+    <div class="calc-card">
+      <div style="font-weight:900;font-size:18px;">🧮 Custom / Ad-hoc Sale</div>
+      <div class="hint">For anything not on the menu, or a quick one-off total.</div>
+      <label>What is it? (optional)</label>
+      <input id="calcDesc" type="text" placeholder="e.g. Slime jar deal, tip, bundle" />
+      <label>Amount ($)</label>
+      <input id="calcAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
+      <label>How many?</label>
+      <input id="calcQty" type="number" inputmode="numeric" step="1" min="1" value="1" />
+      <div class="actions" style="margin-top:14px;">
+        <button class="btn venmo" onclick="addCustomToCart()">➕ Add to Cart</button>
+      </div>
+      <div class="hint">Tip: add it to the cart, then check out from the bar below so it gets logged.</div>
+    </div>
+  </section>
+
+  <!-- SALES LOG -->
+  <section class="view" id="log">
+    <div class="stat">
+      <div class="box"><div class="n" id="statCount">0</div><div class="l">Sales today</div></div>
+      <div class="box"><div class="n" id="statTotal">$0</div><div class="l">Total taken</div></div>
+    </div>
+    <div class="log-card">
+      <table>
+        <thead><tr><th>Time</th><th>Items</th><th>Pay</th><th style="text-align:right;">Amt</th></tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+      <div id="logEmpty" class="empty">No sales logged yet. Ring one up! 🟢</div>
+      <div class="row-actions">
+        <button class="btn export" onclick="exportCSV()">⬇️ Export Spreadsheet (CSV)</button>
+        <button class="btn wipe" onclick="wipeLog()">🗑️ Clear Log</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- CART BAR -->
+<div class="cartbar">
+  <div class="cartlist" id="cartList"><div class="empty">Cart is empty — tap items above 👆</div></div>
+  <div class="totalrow"><span class="t1">Total</span><span class="t2" id="cartTotal">$0.00</span></div>
+  <div class="actions">
+    <button class="btn clear" onclick="clearCart()" title="Empty cart">🗑️</button>
+    <button class="btn cash" onclick="checkout('Cash')">💵 Cash</button>
+    <button class="btn venmo" onclick="checkout('Venmo')">📱 Venmo</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- CONFIG ---------- */
+const VENMO_USER = "Susan-Naughton";          // wife's Venmo handle
+const STORE_NOTE = "Slime Time @ farmers market";
+
+const ITEMS = [
+  { id:"plain",  name:"Plain Slime",     price:5.00, emoji:"🫧", sub:"one slime" },
+  { id:"bundle", name:"2 Slimes + Mix-ins", price:9.00, emoji:"🎁", sub:"deal — save $1", wide:false },
+  { id:"charm",  name:"Bag Charm",       price:1.75, emoji:"🔑", sub:"any charm" },
+  { id:"bin",    name:"Bin of Random",   price:0.50, emoji:"🎲", sub:"everything $0.50" },
+];
+
+/* ---------- STATE ---------- */
+let cart = [];   // {key,label,price,qty}
+let log = JSON.parse(localStorage.getItem("slimeLog") || "[]");
+
+/* ---------- BUILD STORE ---------- */
+const grid = document.getElementById("itemGrid");
+ITEMS.forEach(it=>{
+  const b = document.createElement("button");
+  b.className = "item" + (it.wide ? " wide" : "");
+  b.innerHTML = `<div class="emoji">${it.emoji}</div>
+    <div class="name">${it.name}</div>
+    <div class="price">$${it.price.toFixed(2)}</div>
+    <div class="sub">${it.sub}</div>`;
+  b.onclick = ()=> addToCart(it.id, it.name, it.price);
+  grid.appendChild(b);
+});
+
+/* ---------- CART LOGIC ---------- */
+function addToCart(key,label,price){
+  const found = cart.find(l=>l.key===key && l.price===price);
+  if(found){ found.qty++; }
+  else{ cart.push({key,label,price,qty:1}); }
+  renderCart();
+  toast(`Added ${label}`);
+}
+let mixCounter = 0;
+function addMixin(price){
+  // each price tier stacks together
+  addToCart("mixin_"+price, `Mix-in ($${price.toFixed(2)})`, price);
+}
+function addCustomToCart(){
+  const desc = (document.getElementById("calcDesc").value || "Custom item").trim();
+  const amt = parseFloat(document.getElementById("calcAmt").value);
+  const qty = Math.max(1, parseInt(document.getElementById("calcQty").value)||1);
+  if(!amt || amt<=0){ toast("Enter an amount first"); return; }
+  cart.push({key:"custom_"+(Date.now()), label:desc, price:amt, qty:qty});
+  document.getElementById("calcDesc").value="";
+  document.getElementById("calcAmt").value="";
+  document.getElementById("calcQty").value="1";
+  renderCart();
+  switchView("store");
+  toast("Added to cart");
+}
+function changeQty(i,d){
+  cart[i].qty += d;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  renderCart();
+}
+function clearCart(){ cart=[]; renderCart(); }
+
+function cartTotal(){ return cart.reduce((s,l)=>s+l.price*l.qty,0); }
+
+function renderCart(){
+  const list = document.getElementById("cartList");
+  if(cart.length===0){
+    list.innerHTML = `<div class="empty">Cart is empty — tap items above 👆</div>`;
+  }else{
+    list.innerHTML = "";
+    cart.forEach((l,i)=>{
+      const row = document.createElement("div");
+      row.className="line";
+      row.innerHTML = `
+        <button class="qtybtn minus" onclick="changeQty(${i},-1)">−</button>
+        <span class="qtynum">${l.qty}</span>
+        <button class="qtybtn" onclick="changeQty(${i},1)">+</button>
+        <span class="desc">${l.label}</span>
+        <span class="lp">$${(l.price*l.qty).toFixed(2)}</span>`;
+      list.appendChild(row);
+    });
+  }
+  document.getElementById("cartTotal").textContent = "$"+cartTotal().toFixed(2);
+}
+
+/* ---------- CHECKOUT ---------- */
+function checkout(method){
+  const total = cartTotal();
+  if(total<=0){ toast("Cart is empty"); return; }
+  const itemsText = cart.map(l=> `${l.qty}× ${l.label}`).join(", ");
+
+  // Log it
+  const entry = {
+    ts: new Date().toISOString(),
+    items: itemsText,
+    method: method,
+    amount: +total.toFixed(2)
+  };
+  log.unshift(entry);
+  localStorage.setItem("slimeLog", JSON.stringify(log));
+  renderLog();
+
+  if(method==="Venmo"){
+    const note = encodeURIComponent(STORE_NOTE + ": " + itemsText);
+    const url = `https://venmo.com/${VENMO_USER}?txn=pay&amount=${total.toFixed(2)}&note=${note}`;
+    toast("Opening Venmo…");
+    // open in new tab so the dashboard stays put
+    window.open(url, "_blank");
+  }else{
+    toast(`💵 $${total.toFixed(2)} cash logged`);
+  }
+  cart=[];
+  renderCart();
+}
+
+/* ---------- LOG VIEW ---------- */
+function renderLog(){
+  const body = document.getElementById("logBody");
+  const empty = document.getElementById("logEmpty");
+  body.innerHTML="";
+  if(log.length===0){ empty.style.display="block"; }
+  else{
+    empty.style.display="none";
+    log.forEach((e,i)=>{
+      const t = new Date(e.ts);
+      const time = t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${time}</td>
+        <td>${e.items}</td>
+        <td><span class="method ${e.method}">${e.method}</span></td>
+        <td style="text-align:right;font-weight:800;">$${e.amount.toFixed(2)}
+          <br><button class="undo" onclick="removeEntry(${i})">undo</button></td>`;
+      body.appendChild(tr);
+    });
+  }
+  const total = log.reduce((s,e)=>s+e.amount,0);
+  document.getElementById("statCount").textContent = log.length;
+  document.getElementById("statTotal").textContent = "$"+total.toFixed(2);
+}
+function removeEntry(i){
+  if(!confirm("Remove this sale from the log?")) return;
+  log.splice(i,1);
+  localStorage.setItem("slimeLog", JSON.stringify(log));
+  renderLog();
+}
+function wipeLog(){
+  if(!confirm("Clear ALL logged sales? Export first if you want a copy.")) return;
+  log=[];
+  localStorage.setItem("slimeLog","[]");
+  renderLog();
+}
+function exportCSV(){
+  if(log.length===0){ toast("No sales to export"); return; }
+  const rows = [["Date","Time","Items","Payment Method","Amount (USD)"]];
+  log.slice().reverse().forEach(e=>{
+    const t = new Date(e.ts);
+    rows.push([
+      t.toLocaleDateString(),
+      t.toLocaleTimeString(),
+      `"${e.items.replace(/"/g,'""')}"`,
+      e.method,
+      e.amount.toFixed(2)
+    ]);
+  });
+  const total = log.reduce((s,e)=>s+e.amount,0);
+  rows.push([]);
+  rows.push(["","","","TOTAL",total.toFixed(2)]);
+  const csv = rows.map(r=>r.join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `slime-sales-${stamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Spreadsheet downloaded 📄");
+}
+
+/* ---------- TABS ---------- */
+function switchView(v){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===v));
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active", s.id===v));
+}
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=> switchView(t.dataset.view);
+});
+
+/* ---------- TOAST ---------- */
+let toastTimer;
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove("show"), 1600);
+}
+
+/* ---------- INIT ---------- */
+renderCart();
+renderLog();
+</script>
+</body>
+</html>
